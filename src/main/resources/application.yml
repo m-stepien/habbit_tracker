@@ -23,3 +23,5 @@ spring:
       show-sql: true
 keycloak:
   client-id: test-k
+properties:
+  start-points: 300

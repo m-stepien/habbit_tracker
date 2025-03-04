@@ -17,7 +17,6 @@ public class TestController {
         return Map.of("message", "To jest publiczny endpoint, każdy ma dostęp.");
     }
 
-    // Endpoint dla użytkownika z rolą USER
     @GetMapping("/user")
     public Map<String, Object> userEndpoint(@AuthenticationPrincipal Jwt jwt) {
         return Map.of(
@@ -27,7 +26,6 @@ public class TestController {
         );
     }
 
-    // Endpoint dla administratora (ADMIN)
     @GetMapping("/admin")
     public Map<String, Object> adminEndpoint(@AuthenticationPrincipal Jwt jwt) {
         return Map.of(
