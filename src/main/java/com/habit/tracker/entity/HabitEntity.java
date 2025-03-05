@@ -13,6 +13,7 @@ public class HabitEntity {
     private String name;
     private Integer points;
     private LocalDate creationDate;
+    private LocalDate purchaseDate;
     private Integer unlockCost;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -113,5 +114,13 @@ public class HabitEntity {
 
     public void setStatus(HabitStatus status) {
         this.status = status;
+    }
+
+    public LocalDate getPurchaseDate() {
+        return purchaseDate;
+    }
+
+    public void setPurchaseDate(LocalDate purchaseDate) {
+        this.purchaseDate = purchaseDate;
     }
 }

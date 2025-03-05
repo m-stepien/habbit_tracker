@@ -3,6 +3,7 @@ package com.habit.tracker.entity;
 import com.habit.tracker.enums.ExecutionDayOption;
 import jakarta.persistence.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -18,6 +19,7 @@ public class ExecutionDaysEntity {
     private Set<ExecutionDayOption> executionDays;
 
     public ExecutionDaysEntity() {
+        this.executionDays = new HashSet<>();
     }
 
     public ExecutionDaysEntity(HabitEntity habit, Set<ExecutionDayOption> executionDays) {
@@ -47,5 +49,9 @@ public class ExecutionDaysEntity {
 
     public void setExecutionDays(Set<ExecutionDayOption> executionDays) {
         this.executionDays = executionDays;
+    }
+
+    public void addExecutionDay(ExecutionDayOption executionDay){
+        this.executionDays.add(executionDay);
     }
 }

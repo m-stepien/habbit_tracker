@@ -63,11 +63,12 @@ public class HabitServiceTest {
         executionDaysEntity.setExecutionDays(Set.of(ExecutionDayOption.MONDAY));
         executionDaysEntity.setId(1L);
         executionDaysEntity.setHabit(habitEntity);
-        when(this.executionDayRepository.findForUserForDay(userId, executionDayOption))
+        when(this.executionDayRepository.findForUserForDay(userId, executionDayOption, ExecutionDayOption.EVERYDAY))
                 .thenReturn(List.of(executionDaysEntity));
         when(this.habitMapper.toHabitDto(habitEntity)).thenReturn(result);
         assertEquals(List.of(result), this.habitService.fetchActiveHabitInDay(userId, executionDayOption));
-        verify(executionDayRepository, Mockito.times(1)).findForUserForDay(userId, executionDayOption);
+        verify(executionDayRepository, Mockito.times(1))
+                .findForUserForDay(userId, executionDayOption, ExecutionDayOption.EVERYDAY);
     }
 
     @Test

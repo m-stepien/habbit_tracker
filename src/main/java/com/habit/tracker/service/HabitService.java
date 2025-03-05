@@ -13,9 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class HabitService {
@@ -25,24 +27,26 @@ public class HabitService {
     private final ExecutionDayRepository executionDayRepository;
 
     @Autowired
-    HabitService(PointsService pointsService, HabitRepository habitRepository, ExecutionDayRepository executionDayRepository, HabitMapper habitMapper){
+    HabitService(PointsService pointsService, HabitRepository habitRepository,
+                 ExecutionDayRepository executionDayRepository, HabitMapper habitMapper) {
         this.pointsService = pointsService;
         this.habitRepository = habitRepository;
         this.executionDayRepository = executionDayRepository;
         this.habitMapper = habitMapper;
     }
 
-    public HabitDto getUserHabitByHabitId(String userId, long habitId){
-        HabitEntity habit = this.habitRepository.findByIdAndUserId(habitId, userId).orElseThrow(EntityNotFoundException::new);
+    public HabitDto getUserHabitById(String userId, long habitId) {
+        HabitEntity habit = this.habitRepository.findByIdAndUserId(habitId, userId)
+                .orElseThrow(EntityNotFoundException::new);
         return this.habitMapper.toHabitDto(habit);
     }
 
-    public List<HabitDto> getUserHabits(String userId){
+    public List<HabitDto> getUserHabits(String userId) {
         List<HabitEntity> userHabits = this.habitRepository.findByUserId(userId);
         return userHabits.stream().map(this.habitMapper::toHabitDto).toList();
     }
 
-    public void saveUserHabit(String userId, HabitDto newHabitDto){
+    public void saveUserHabit(String userId, HabitDto newHabitDto) {
         //todo  validation
         //todo check if already exist in repo
         HabitEntity newHabitEntity = this.habitMapper.toHabitEntity(newHabitDto);
@@ -51,30 +55,54 @@ public class HabitService {
     }
 
     @Transactional
-    public void purchaseHabit(String userId, Long habitId){
-        HabitEntity habitEntity = this.habitRepository.findByIdAndUserId(habitId, userId).orElseThrow(EntityNotFoundException::new);
+    public void purchaseHabit(String userId, Long habitId) {
+        HabitEntity habitEntity = this.habitRepository.findByIdAndUserId(habitId, userId)
+                .orElseThrow(EntityNotFoundException::new);
         int unlockCost = habitEntity.getUnlockCost();
-        if(this.pointsService.canUserBuy(userId, unlockCost)) {
+        if (this.pointsService.canUserBuy(userId, unlockCost)) {
             habitEntity.setStatus(HabitStatus.ACTIVE);
+            habitEntity.setPurchaseDate(LocalDate.now());
+            this.habitRepository.save(habitEntity);
             this.pointsService.pay(userId, unlockCost);
         }
     }
 
-    public void setHabitExecutionDays(String userId, Long habitId, List<ExecutionDayOption> executionDayOption){
-        HabitEntity habit = this.habitRepository.findByIdAndUserId(habitId, userId).orElseThrow(EntityNotFoundException::new);
-        ExecutionDaysEntity executionDays = new ExecutionDaysEntity(habit, new HashSet<>(executionDayOption));
-        this.executionDayRepository.save(executionDays);
+    public void setHabitExecutionDays(String userId, Long habitId, List<ExecutionDayOption> executionDayOption) {
+        HabitEntity habit = this.habitRepository.findByIdAndUserId(habitId, userId)
+                .orElseThrow(EntityNotFoundException::new);
+        ExecutionDaysEntity currentExecutionDays = this.executionDayRepository
+                .findByHabit(habit).orElse(null);
+        if (currentExecutionDays != null) {
+            if (!currentExecutionDays.getExecutionDays().contains(ExecutionDayOption.EVERYDAY)) {
+                if (executionDayOption.contains(ExecutionDayOption.EVERYDAY)) {
+                    currentExecutionDays.setExecutionDays(Set.of(ExecutionDayOption.EVERYDAY));
+                } else {
+                    for (ExecutionDayOption newDay : executionDayOption) {
+                        currentExecutionDays.addExecutionDay(newDay);
+                    }
+                }
+            }
+        } else {
+            currentExecutionDays = new ExecutionDaysEntity(habit, new HashSet<>(executionDayOption));
+        }
+        this.executionDayRepository.save(currentExecutionDays);
     }
 
-    public List<HabitDto> fetchActiveHabitInDay(String userId, ExecutionDayOption day){
-        List<HabitEntity> habitForDay = this.executionDayRepository.findForUserForDay(userId, day).stream()
+    public List<HabitDto> fetchActiveHabitInDay(String userId, ExecutionDayOption day) {
+        List<HabitEntity> habitForDay = this.executionDayRepository
+                .findForUserForDay(userId, day, ExecutionDayOption.EVERYDAY).stream()
                 .map(ExecutionDaysEntity::getHabit).toList();
-        habitForDay = habitForDay.stream().filter(habit -> habit.getStatus().equals(HabitStatus.ACTIVE)).toList();
+        habitForDay = habitForDay.stream().filter(habit -> habit.getStatus().equals(HabitStatus.ACTIVE))
+                .toList();
         List<HabitDto> habitDtoList = new ArrayList<>();
-        for(HabitEntity habit:habitForDay){
+        for (HabitEntity habit : habitForDay) {
             habitDtoList.add(this.habitMapper.toHabitDto(habit));
         }
         return habitDtoList;
+    }
+
+    public HabitEntity getHabitById(Long habitId){
+        return this.habitRepository.findById(habitId).orElseThrow(EntityNotFoundException::new);
     }
 
 }

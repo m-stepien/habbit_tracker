@@ -5,8 +5,10 @@ import com.habit.tracker.repository.PointsRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Service
 public class PointsService {
 
     private final PointsRepository pointsRepository;
