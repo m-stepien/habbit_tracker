@@ -35,5 +35,4 @@ public class HabitController {
         this.habitService.saveUserHabit(jwt.getClaimAsString("sub"), habitDto);
         return ResponseEntity.noContent().build();
     }
-
 }

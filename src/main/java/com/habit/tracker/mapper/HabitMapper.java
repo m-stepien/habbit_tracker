@@ -7,7 +7,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class HabitMapper {
 
+
     public HabitDto toHabitDto(HabitEntity habitEntity){
+        System.out.println(habitEntity.getUnlockCost());
+        System.out.println(habitEntity.getId());
+
         return new HabitDto(habitEntity.getId(), habitEntity.getName(), habitEntity.getPoints(), habitEntity.getCreationDate(),
                 habitEntity.getUnlockCost());
     }

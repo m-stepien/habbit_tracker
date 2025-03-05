@@ -46,8 +46,6 @@ public class HabitEntity {
         this.status = habitStatus;
     }
 
-
-
     public HabitEntity(HabitEntity habitEntity){
         this.name= habitEntity.getName();
         this.points= habitEntity.getPoints();

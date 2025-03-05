@@ -43,4 +43,11 @@ public class PointsService {
         points.setPoints(points.getPoints() - cost);
         this.pointsRepository.save(points);
     }
+
+    @Transactional
+    public void addPoints(String userId, int additionalPoints){
+        PointsEntity points = this.pointsRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+        points.setPoints(points.getPoints()+additionalPoints);
+        this.pointsRepository.save(points);
+    }
 }
