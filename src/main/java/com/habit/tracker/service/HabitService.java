@@ -1,6 +1,7 @@
 package com.habit.tracker.service;
 
 import com.habit.tracker.dto.HabitDto;
+import com.habit.tracker.dto.HabitWithDaysDto;
 import com.habit.tracker.entity.ExecutionDaysEntity;
 import com.habit.tracker.entity.HabitEntity;
 import com.habit.tracker.enums.ExecutionDayOption;
@@ -35,10 +36,11 @@ public class HabitService {
         this.habitMapper = habitMapper;
     }
 
-    public HabitDto getUserHabitById(String userId, long habitId) {
+    public HabitWithDaysDto getUserHabitById(String userId, long habitId) {
         HabitEntity habit = this.habitRepository.findByIdAndUserId(habitId, userId)
                 .orElseThrow(EntityNotFoundException::new);
-        return this.habitMapper.toHabitDto(habit);
+        ExecutionDaysEntity executionDays = this.executionDayRepository.findByHabit(habit).orElse(new ExecutionDaysEntity());
+        return this.habitMapper.habitWithDaysDto(habit, executionDays);
     }
 
     public List<HabitDto> getUserHabits(String userId) {
@@ -68,23 +70,14 @@ public class HabitService {
     }
 
     public void setHabitExecutionDays(String userId, Long habitId, List<ExecutionDayOption> executionDayOption) {
+        if(executionDayOption.contains(ExecutionDayOption.EVERYDAY)){
+            executionDayOption = List.of(ExecutionDayOption.EVERYDAY);
+        }
         HabitEntity habit = this.habitRepository.findByIdAndUserId(habitId, userId)
                 .orElseThrow(EntityNotFoundException::new);
         ExecutionDaysEntity currentExecutionDays = this.executionDayRepository
-                .findByHabit(habit).orElse(null);
-        if (currentExecutionDays != null) {
-            if (!currentExecutionDays.getExecutionDays().contains(ExecutionDayOption.EVERYDAY)) {
-                if (executionDayOption.contains(ExecutionDayOption.EVERYDAY)) {
-                    currentExecutionDays.setExecutionDays(Set.of(ExecutionDayOption.EVERYDAY));
-                } else {
-                    for (ExecutionDayOption newDay : executionDayOption) {
-                        currentExecutionDays.addExecutionDay(newDay);
-                    }
-                }
-            }
-        } else {
-            currentExecutionDays = new ExecutionDaysEntity(habit, new HashSet<>(executionDayOption));
-        }
+                .findByHabit(habit).orElseGet(() -> new ExecutionDaysEntity(habit));
+        currentExecutionDays.setExecutionDays(new HashSet<>(executionDayOption));
         this.executionDayRepository.save(currentExecutionDays);
     }
 
@@ -101,8 +94,7 @@ public class HabitService {
         return habitDtoList;
     }
 
-    public HabitEntity getHabitById(Long habitId){
+    public HabitEntity getHabitById(Long habitId) {
         return this.habitRepository.findById(habitId).orElseThrow(EntityNotFoundException::new);
     }
-
 }

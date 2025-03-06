@@ -22,10 +22,17 @@ public class ExecutionDaysEntity {
         this.executionDays = new HashSet<>();
     }
 
+    public ExecutionDaysEntity(HabitEntity habit) {
+        this.habit = habit;
+        this.executionDays = new HashSet<>();
+    }
+
     public ExecutionDaysEntity(HabitEntity habit, Set<ExecutionDayOption> executionDays) {
         this.habit = habit;
         this.executionDays = executionDays;
     }
+
+
 
     public Long getId() {
         return id;

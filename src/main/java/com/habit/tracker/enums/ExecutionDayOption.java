@@ -1,5 +1,7 @@
 package com.habit.tracker.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 public enum ExecutionDayOption {
     MONDAY,
     TUESDAY,
@@ -8,5 +10,10 @@ public enum ExecutionDayOption {
     FRIDAY,
     SATURDAY,
     SUNDAY,
-    EVERYDAY
+    EVERYDAY;
+
+    @JsonCreator
+    public static ExecutionDayOption fromString(String value){
+        return ExecutionDayOption.valueOf(value.toUpperCase());
+    }
 }
