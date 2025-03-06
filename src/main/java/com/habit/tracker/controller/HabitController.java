@@ -46,4 +46,10 @@ public class HabitController {
         this.habitService.setHabitExecutionDays(jwt.getClaimAsString("sub"), executionDayRequest.habitId(), executionDayRequest.executionDayList());
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/activate/{id}")
+    public ResponseEntity<Void> activateHabit(@AuthenticationPrincipal Jwt jwt, @PathVariable("id") Long id){
+        this.habitService.purchaseHabit(jwt.getClaimAsString("sub"), id);
+        return ResponseEntity.noContent().build();
+    }
 }
