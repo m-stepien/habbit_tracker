@@ -21,8 +21,14 @@ public class PointsController {
         this.pointsService = pointsService;
     }
 
-    @PostMapping
-    public ResponseEntity<Void> create(@RequestBody Map<String, Object> eventData){
-        this.pointsService.createUserPoints(eventData.get())
+    @PostMapping("/create")
+    public ResponseEntity<String> create(@RequestBody Map<String, Object> eventData){
+        String eventType = (String) eventData.get("type");
+        Map<String, Object> userDetails = (Map<String, Object>) eventData.get("representation");
+        if("REGISTER".equals(eventType)){
+            String userId = (String) userDetails.get("id");
+            pointsService.createUserPoints(userId);
+        }
+        return ResponseEntity.ok("OK");
     }
 }
