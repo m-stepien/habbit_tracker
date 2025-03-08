@@ -1,19 +1,22 @@
-package com.keycloak.listener;
+package org.keycloak.provider;
 
 import com.google.gson.JsonObject;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventType;
 import org.keycloak.events.admin.AdminEvent;
+import org.keycloak.models.KeycloakSession;
 
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class CustomEventListener implements EventListenerProvider {
+public class CustomEventListenerProvider implements EventListenerProvider {
 
     private final String address = "http://localhost:8080/points/create";
-    public CustomEventListener() {
+    private KeycloakSession keycloakSession;
+    public CustomEventListenerProvider(KeycloakSession keycloakSession){
+        this.keycloakSession = keycloakSession;
     }
 
     @Override

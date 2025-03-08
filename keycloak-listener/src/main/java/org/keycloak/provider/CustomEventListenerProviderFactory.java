@@ -1,16 +1,16 @@
-package com.keycloak.listener;
+package org.keycloak.provider;
 
 import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventListenerProviderFactory;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 
-public class CustomEventListenerFactory implements EventListenerProviderFactory {
+public class CustomEventListenerProviderFactory implements EventListenerProviderFactory {
     public static final String ID="custom-event-listener";
 
     @Override
     public EventListenerProvider create(KeycloakSession keycloakSession) {
-        return new CustomEventListener();
+        return new CustomEventListenerProvider(keycloakSession);
     }
 
     @Override

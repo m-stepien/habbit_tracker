@@ -1,6 +1,7 @@
 services:
   keycloak:
-    image: quay.io/keycloak/keycloak:latest
+    build: .
+    image: my-keycloak:latest
     container_name: keycloak
     ports:
       - "8200:8080"
@@ -14,8 +15,8 @@ services:
       - KC_LOG_LEVEL=debug
       - KC_HTTP_ENABLED=true
 #      - KC_SPI_PROVIDERS_PATH=/opt/keycloak/providers/
-#      - KC_SPI_EVENTS_LISTENER=custom-event-listener
-    command: ["start-dev"]
+      - KC_SPI_EVENTS_LISTENER=custom-event-listener
+#    command: ["start-dev"]
     depends_on:
       - postgres
   postgres:
@@ -27,3 +28,4 @@ services:
       - POSTGRES_DB=keycloak
       - POSTGRES_USER=keycloak
       - POSTGRES_PASSWORD=keycloak
+
