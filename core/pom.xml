@@ -69,6 +69,10 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${SPRING-BOOT-VERSION}</version>
+                <configuration>
+                    <mainClass>com.habit.tracker.core.App</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>

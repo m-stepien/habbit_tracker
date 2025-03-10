@@ -1,6 +1,6 @@
-import com.habit.tracker.entity.PointsEntity;
-import com.habit.tracker.repository.PointsRepository;
-import com.habit.tracker.service.PointsService;
+import com.habit.tracker.core.entity.PointsEntity;
+import com.habit.tracker.core.repository.PointsRepository;
+import com.habit.tracker.core.service.PointsService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

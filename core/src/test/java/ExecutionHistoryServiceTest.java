@@ -1,10 +1,10 @@
-import com.habit.tracker.entity.ExecutionHistoryEntity;
-import com.habit.tracker.entity.HabitEntity;
-import com.habit.tracker.enums.ExecutionState;
-import com.habit.tracker.enums.HabitStatus;
-import com.habit.tracker.repository.ExecutionHistoryRepository;
-import com.habit.tracker.service.ExecutionHistoryService;
-import com.habit.tracker.service.HabitService;
+import com.habit.tracker.core.entity.ExecutionHistoryEntity;
+import com.habit.tracker.core.entity.HabitEntity;
+import com.habit.tracker.core.enums.ExecutionState;
+import com.habit.tracker.core.enums.HabitStatus;
+import com.habit.tracker.core.repository.ExecutionHistoryRepository;
+import com.habit.tracker.core.service.ExecutionHistoryService;
+import com.habit.tracker.core.service.HabitService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

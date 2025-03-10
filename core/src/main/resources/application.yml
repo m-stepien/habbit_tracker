@@ -5,8 +5,8 @@ spring:
     oauth2:
       resourceServer:
         jwt:
-          issuer-uri: http://localhost:8200/realms/KeycloakTest
-          jwk-set-uri: http://localhost:8200/realms/KeycloakTest/protocol/openid-connect/certs
+          issuer-uri: http://localhost:8200/realms/habit-tracker
+          jwk-set-uri: http://localhost:8200/realms/habit-tracker/protocol/openid-connect/certs
   datasource:
     url: jdbc:h2:mem:testdb
     driverClassName: org.h2.Driver
@@ -22,6 +22,6 @@ spring:
         ddl-auto: update
       show-sql: true
 keycloak:
-  client-id: test-k
+  client-id: habit-tracker-client
 properties:
   start-points: 300

@@ -12,11 +12,13 @@ services:
       - KC_DB_URL_HOST=postgres
       - KC_DB_USERNAME=keycloak
       - KC_DB_PASSWORD=keycloak
-      - KC_LOG_LEVEL=debug
+#      - KC_LOG_LEVEL=debug
       - KC_HTTP_ENABLED=true
-#      - KC_SPI_PROVIDERS_PATH=/opt/keycloak/providers/
-      - KC_SPI_EVENTS_LISTENER=custom-event-listener
-#    command: ["start-dev"]
+      - KC_SPI_PROVIDERS_PATH=/opt/keycloak/providers/
+      - KC_EVENTS_LISTENERS=custom-event-listener
+    volumes:
+      - "./keycloak-listener/src/main/resources/realm/habit-tracker-realm.json:/opt/keycloak/data/import/realm.json"
+    command: ["start-dev", "--import-realm"]
     depends_on:
       - postgres
   postgres:
