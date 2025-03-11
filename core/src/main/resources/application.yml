@@ -25,3 +25,4 @@ keycloak:
   client-id: habit-tracker-client
 properties:
   start-points: 300
+  days-back-editable: 7
