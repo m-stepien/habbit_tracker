@@ -2,7 +2,7 @@ import com.habit.tracker.core.entity.ExecutionHistoryEntity;
 import com.habit.tracker.core.entity.HabitEntity;
 import com.habit.tracker.core.enums.ExecutionState;
 import com.habit.tracker.core.enums.HabitStatus;
-import com.habit.tracker.core.exceptions.IncorectDateException;
+import com.habit.tracker.core.exceptions.IncorrectDateException;
 import com.habit.tracker.core.repository.ExecutionHistoryRepository;
 import com.habit.tracker.core.service.ExecutionHistoryService;
 import com.habit.tracker.core.service.HabitService;
@@ -15,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,7 +30,7 @@ public class ExecutionHistoryServiceTest {
     ExecutionHistoryService executionHistoryService;
 
     @Test
-    void testMarkHabitInDaySuccess() throws IncorectDateException{
+    void testMarkHabitInDaySuccess() throws IncorrectDateException {
         String userId = "test123";
         Long habitId = 2L;
         ExecutionState state = ExecutionState.DONE;
@@ -62,7 +61,7 @@ public class ExecutionHistoryServiceTest {
         habit.setUserId(userId);
         habit.setStatus(HabitStatus.ACTIVE);
         when(habitService.getHabitById(habitId)).thenReturn(habit);
-        assertThrows(IncorectDateException.class, () -> this.executionHistoryService.markHabitInDay(userId, habitId, state, date));
+        assertThrows(IncorrectDateException.class, () -> this.executionHistoryService.markHabitInDay(userId, habitId, state, date));
     }
 
 

@@ -8,7 +8,7 @@ import com.habit.tracker.core.entity.ExecutionHistoryEntity;
 import com.habit.tracker.core.entity.HabitEntity;
 import com.habit.tracker.core.enums.ExecutionState;
 import com.habit.tracker.core.enums.HabitStatus;
-import com.habit.tracker.core.exceptions.IncorectDateException;
+import com.habit.tracker.core.exceptions.IncorrectDateException;
 import com.habit.tracker.core.mapper.HabitMapper;
 import com.habit.tracker.core.repository.ExecutionHistoryRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -62,7 +62,7 @@ public class ExecutionHistoryService {
         return habitExecutionHistoryDtoList;
     }
 
-    public void markHabitInDay(String userId, Long habitId, ExecutionState state, LocalDate date) throws IncorectDateException {
+    public void markHabitInDay(String userId, Long habitId, ExecutionState state, LocalDate date) throws IncorrectDateException {
         HabitEntity habit = this.habitService.getHabitById(habitId);
         if (date != null) {
             if (isValidToMark(userId, habit)) {
@@ -74,11 +74,11 @@ public class ExecutionHistoryService {
                 throw new AccessDeniedException("You don't own this habit");
             }
         } else {
-            throw new IncorectDateException("Date can not by null");
+            throw new IncorrectDateException("Date can not by null");
         }
     }
 
-    public void editDateOfExecution(Long executionId, LocalDate newDate) throws Exception {
+    public void editDateOfExecution(Long executionId, LocalDate newDate) throws IncorrectDateException {
         ExecutionHistoryEntity executionHistory = this.executionHistoryRepository
                 .findById(executionId).orElseThrow(EntityNotFoundException::new);
         if (this.checkIsNotAfterToday(newDate)) {
@@ -87,7 +87,7 @@ public class ExecutionHistoryService {
             executionHistory.setDate(newDate);
             this.executionHistoryRepository.save(executionHistory);
         } else {
-            throw new IncorectDateException("Date can't be in future");
+            throw new IncorrectDateException("Date can't be in future");
         }
     }
 
@@ -117,12 +117,12 @@ public class ExecutionHistoryService {
     }
 
 
-    private boolean checkIsExecutionEditable(LocalDate date) throws Exception {
+    private boolean checkIsExecutionEditable(LocalDate date) throws IncorrectDateException {
         LocalDate deadline = LocalDate.now().minusDays(this.numberOfEditableDay);
         if (date.isAfter(deadline)) {
             return true;
         } else {
-            throw new IncorectDateException("You can't edit record before " + deadline.toString()
+            throw new IncorrectDateException("You can't edit record before " + deadline.toString()
                     + "current try date was" + date.toString());
         }
     }
