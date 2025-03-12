@@ -68,15 +68,24 @@ public class ExecutionHistoryService {
 
     public void markHabitInDay(String userId, Long habitId, ExecutionState state, LocalDate date) throws IncorrectDateException {
         HabitEntity habit = this.habitService.getHabitById(habitId);
+        ExecutionState stateBefore = null;
         if (date != null) {
-            if(this.checkIsNotAfterToday(date) && this.checkIsExecutionEditable(date)) {
+            if (this.checkIsNotAfterToday(date) && this.checkIsExecutionEditable(date)) {
                 if (isValidToMark(userId, habit)) {
-                    ExecutionHistoryEntity executionHistoryEntity = this.createRecord(habitId, date, state, habit);
-                    this.executionHistoryRepository.save(executionHistoryEntity);
-                    if(state.equals(ExecutionState.DONE)) {
-                        this.habitService.decreaseRemainingDaysOfHabit(habit);
+                    ExecutionHistoryEntity record = this.executionHistoryRepository.findByHabitIdAndDate(habitId, date).orElse(null);
+                    if (record != null) {
+                        stateBefore = record.getExecutionState();
                     }
-                    this.pointsService.changePointAfterMark(state, habit.getPoints(),userId);
+                    ExecutionHistoryEntity executionHistoryEntity = this.updateRecord(date, state, habit, record);
+                    this.executionHistoryRepository.save(executionHistoryEntity);
+                    if (state.equals(ExecutionState.DONE) && !ExecutionState.DONE.equals(stateBefore)) {
+                        this.habitService.decreaseRemainingDaysOfHabit(habit);
+                    } else if (ExecutionState.DONE.equals(stateBefore) && !state.equals(ExecutionState.DONE)) {
+                        this.habitService.increaseremainingDaysOfHabit(habit);
+                    }
+                    if(!state.equals(stateBefore)) {
+                        this.pointsService.changePointAfterMark(state, habit.getPoints(), userId, stateBefore);
+                    }
                 } else if (habit.getStatus().equals(HabitStatus.INACTIVE)) {
                     throw new AccessDeniedException("Habit is not purchase");
                 } else {
@@ -91,7 +100,7 @@ public class ExecutionHistoryService {
     public void editDateOfExecution(String userId, Long executionId, LocalDate newDate) throws IncorrectDateException {
         ExecutionHistoryEntity executionHistory = this.executionHistoryRepository
                 .findById(executionId).orElseThrow(EntityNotFoundException::new);
-        if(!executionHistory.getHabit().getUserId().equals(userId)){
+        if (!executionHistory.getHabit().getUserId().equals(userId)) {
             throw new AccessDeniedException("You don't own habit related to this execution");
         }
         if (this.checkIsNotAfterToday(newDate)) {
@@ -112,8 +121,7 @@ public class ExecutionHistoryService {
         return userId.equals(habit.getUserId()) && habit.getStatus().equals(HabitStatus.ACTIVE);
     }
 
-    private ExecutionHistoryEntity createRecord(Long habitId, LocalDate date, ExecutionState state, HabitEntity habit) {
-        ExecutionHistoryEntity record = this.executionHistoryRepository.findByHabitIdAndDate(habitId, date).orElse(null);
+    private ExecutionHistoryEntity updateRecord(LocalDate date, ExecutionState state, HabitEntity habit, ExecutionHistoryEntity record) {
         if (record == null) {
             record = new ExecutionHistoryEntity();
         }

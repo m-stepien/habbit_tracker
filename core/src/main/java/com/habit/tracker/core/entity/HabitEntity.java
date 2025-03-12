@@ -144,4 +144,8 @@ public class HabitEntity {
         this.remainingDays-=1;
     }
 
+    public void increaseRemainingDays(){
+        this.remainingDays+=1;
+    }
+
 }

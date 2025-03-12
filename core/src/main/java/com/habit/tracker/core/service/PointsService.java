@@ -61,8 +61,9 @@ public class PointsService {
     }
 
     @Transactional
-    public void changePointAfterMark(ExecutionState state, int points, String userId){
+    public void changePointAfterMark(ExecutionState state, int points, String userId, ExecutionState stateBefore){
         PointsEntity pointsEntity = this.pointsRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+
         if(state.equals(ExecutionState.DONE)){
             pointsEntity.setPoints(pointsEntity.getPoints()+points);
         }
@@ -71,6 +72,17 @@ public class PointsService {
         }
         else{
             pointsEntity.setPoints(pointsEntity.getPoints()-points);
+        }
+        if(stateBefore!=null){
+            if(stateBefore.equals(ExecutionState.DONE)){
+                pointsEntity.setPoints(pointsEntity.getPoints()-points);
+            }
+            else if(stateBefore.equals(ExecutionState.NOTDONECHECKED)){
+                pointsEntity.setPoints(pointsEntity.getPoints()+points / 2);
+            }
+            else{
+                pointsEntity.setPoints(pointsEntity.getPoints()+points);
+            }
         }
         this.pointsRepository.save(pointsEntity);
     }

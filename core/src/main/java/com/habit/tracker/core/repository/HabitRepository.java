@@ -12,4 +12,5 @@ public interface HabitRepository extends JpaRepository<HabitEntity, Long> {
     List<HabitEntity> findByUserId(String userId);
     List<HabitEntity> findByUserIdAndStatus(String userId, HabitStatus status);
     List<HabitEntity> findByUserIdAndName(String userId, String name);
+    List<HabitEntity> findByStatus(HabitStatus status);
 }

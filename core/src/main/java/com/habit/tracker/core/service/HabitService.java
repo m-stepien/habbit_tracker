@@ -113,6 +113,13 @@ public class HabitService {
         this.habitRepository.save(habit);
     }
 
+    @Transactional
+    public void increaseremainingDaysOfHabit(HabitEntity habit){
+        habit.increaseRemainingDays();
+        if(habit.getStatus().equals(HabitStatus.COMPLETED)){
+            habit.setStatus(HabitStatus.ACTIVE);
+        }
+    }
 
     @Transactional
     private boolean isOwnByUser(String userId, HabitEntity habit){
