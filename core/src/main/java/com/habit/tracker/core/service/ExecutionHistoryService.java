@@ -30,12 +30,16 @@ public class ExecutionHistoryService {
     private HabitService habitService;
     private ExecutionHistoryRepository executionHistoryRepository;
     private HabitMapper habitMapper;
+    private PointsService pointsService;
+
 
     @Autowired
-    public ExecutionHistoryService(HabitService habitService, ExecutionHistoryRepository executionHistoryRepository, HabitMapper habitMapper) {
+    public ExecutionHistoryService(HabitService habitService, ExecutionHistoryRepository executionHistoryRepository,
+                                   HabitMapper habitMapper, PointsService pointsService) {
         this.habitService = habitService;
         this.executionHistoryRepository = executionHistoryRepository;
         this.habitMapper = habitMapper;
+        this.pointsService = pointsService;
     }
 
     public List<ExecutionHistoryDayDto> getExecutionInDay(String userId, LocalDate date) {
@@ -69,6 +73,10 @@ public class ExecutionHistoryService {
                 if (isValidToMark(userId, habit)) {
                     ExecutionHistoryEntity executionHistoryEntity = this.createRecord(habitId, date, state, habit);
                     this.executionHistoryRepository.save(executionHistoryEntity);
+                    if(state.equals(ExecutionState.DONE)) {
+                        this.habitService.decreaseRemainingDaysOfHabit(habit);
+                    }
+                    this.pointsService.changePointAfterMark(state, habit.getPoints(),userId);
                 } else if (habit.getStatus().equals(HabitStatus.INACTIVE)) {
                     throw new AccessDeniedException("Habit is not purchase");
                 } else {
@@ -127,8 +135,8 @@ public class ExecutionHistoryService {
         if (date.isAfter(deadline)) {
             return true;
         } else {
-            throw new IncorrectDateException("You can't edit record before " + deadline.toString()
-                    + " current try date was " + date.toString());
+            throw new IncorrectDateException("You can't edit record before " + deadline
+                    + " current try date was " + date);
         }
     }
 

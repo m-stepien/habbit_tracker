@@ -9,5 +9,6 @@ import java.util.List;
 public record HabitWithDaysDto(Long id, String name,
                                Integer points, LocalDate creationDate,
                                Integer unlockCost, HabitStatus status,
-                               List<ExecutionDayOption> executionDayList) {
+                               List<ExecutionDayOption> executionDayList,
+                               Integer daysToMaster, Integer remainingDays) {
 }

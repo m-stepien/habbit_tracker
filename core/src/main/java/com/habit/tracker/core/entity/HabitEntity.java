@@ -18,6 +18,9 @@ public class HabitEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private HabitStatus status;
+    private Integer daysToMaster;
+    private Integer remainingDays;
+
 
     public HabitEntity() {
     }
@@ -123,4 +126,22 @@ public class HabitEntity {
     public void setPurchaseDate(LocalDate purchaseDate) {
         this.purchaseDate = purchaseDate;
     }
+
+    public Integer getDaysToMaster() {
+        return daysToMaster;
+    }
+
+    public void setDaysToMaster(Integer daysToMaster) {
+        this.daysToMaster = daysToMaster;
+        this.remainingDays = daysToMaster;
+    }
+
+    public Integer getRemainingDays() {
+        return remainingDays;
+    }
+
+    public void decreaseRemainingDays(){
+        this.remainingDays-=1;
+    }
+
 }

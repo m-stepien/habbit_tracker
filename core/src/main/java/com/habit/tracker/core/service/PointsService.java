@@ -1,6 +1,7 @@
 package com.habit.tracker.core.service;
 
 import com.habit.tracker.core.entity.PointsEntity;
+import com.habit.tracker.core.enums.ExecutionState;
 import com.habit.tracker.core.repository.PointsRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,9 +54,24 @@ public class PointsService {
     }
 
     @Transactional
-    public void addPoints(String userId, int additionalPoints){
+    public void addPoints(String userId, int additionalPoints) {
         PointsEntity points = this.pointsRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
-        points.setPoints(points.getPoints()+additionalPoints);
+        points.setPoints(points.getPoints() + additionalPoints);
         this.pointsRepository.save(points);
+    }
+
+    @Transactional
+    public void changePointAfterMark(ExecutionState state, int points, String userId){
+        PointsEntity pointsEntity = this.pointsRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+        if(state.equals(ExecutionState.DONE)){
+            pointsEntity.setPoints(pointsEntity.getPoints()+points);
+        }
+        else if(state.equals(ExecutionState.NOTDONECHECKED)){
+            pointsEntity.setPoints(pointsEntity.getPoints()- points / 2);
+        }
+        else{
+            pointsEntity.setPoints(pointsEntity.getPoints()-points);
+        }
+        this.pointsRepository.save(pointsEntity);
     }
 }

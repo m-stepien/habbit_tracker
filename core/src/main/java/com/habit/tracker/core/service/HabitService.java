@@ -6,6 +6,7 @@ import com.habit.tracker.core.entity.ExecutionDaysEntity;
 import com.habit.tracker.core.entity.HabitEntity;
 import com.habit.tracker.core.enums.ExecutionDayOption;
 import com.habit.tracker.core.enums.HabitStatus;
+import com.habit.tracker.core.exceptions.HabitAlreadyBoughtException;
 import com.habit.tracker.core.mapper.HabitMapper;
 import com.habit.tracker.core.repository.ExecutionDayRepository;
 import com.habit.tracker.core.repository.HabitRepository;
@@ -48,11 +49,12 @@ public class HabitService {
     }
 
     public void saveUserHabit(String userId, HabitDto newHabitDto) {
-        //todo  validation
-        //todo check if already exist in repo
-        HabitEntity newHabitEntity = this.habitMapper.toHabitEntity(newHabitDto);
-        newHabitEntity.setUserId(userId);
-        this.habitRepository.save(newHabitEntity);
+        List<HabitEntity> habitEntities = this.habitRepository.findByUserIdAndName(userId, newHabitDto.name());
+        if(habitEntities.isEmpty()) {
+            HabitEntity newHabitEntity = this.habitMapper.toHabitEntity(newHabitDto);
+            newHabitEntity.setUserId(userId);
+            this.habitRepository.save(newHabitEntity);
+        }
     }
 
     @Transactional
@@ -61,10 +63,15 @@ public class HabitService {
                 .orElseThrow(EntityNotFoundException::new);
         int unlockCost = habitEntity.getUnlockCost();
         if (this.pointsService.canUserBuy(userId, unlockCost)) {
-            habitEntity.setStatus(HabitStatus.ACTIVE);
-            habitEntity.setPurchaseDate(LocalDate.now());
-            this.habitRepository.save(habitEntity);
-            this.pointsService.pay(userId, unlockCost);
+            if(!this.isOwnByUser(userId, habitEntity)) {
+                habitEntity.setStatus(HabitStatus.ACTIVE);
+                habitEntity.setPurchaseDate(LocalDate.now());
+                this.habitRepository.save(habitEntity);
+                this.pointsService.pay(userId, unlockCost);
+            }
+            else{
+                throw new HabitAlreadyBoughtException("This habit is already active");
+            }
         }
     }
 
@@ -95,5 +102,26 @@ public class HabitService {
 
     public HabitEntity getHabitById(Long habitId) {
         return this.habitRepository.findById(habitId).orElseThrow(EntityNotFoundException::new);
+    }
+
+    @Transactional
+    public void decreaseRemainingDaysOfHabit(HabitEntity habit){
+        habit.decreaseRemainingDays();
+        if(habit.getRemainingDays()==0){
+            habit.setStatus(HabitStatus.COMPLETED);
+        }
+        this.habitRepository.save(habit);
+    }
+
+
+    @Transactional
+    private boolean isOwnByUser(String userId, HabitEntity habit){
+        List<HabitEntity> userActiveHabit = this.habitRepository.findByUserIdAndStatus(userId, HabitStatus.ACTIVE);
+        for(HabitEntity activeHabit: userActiveHabit){
+            if(activeHabit.getId().equals(habit.getId())){
+                return true;
+            }
+        }
+        return false;
     }
 }

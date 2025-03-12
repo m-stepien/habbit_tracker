@@ -40,7 +40,8 @@ public class HabitServiceTest {
 
     @Test
     void saveUserHabit(){
-        HabitDto habitDto = new HabitDto(1L,"test123", 13, LocalDate.now(), 20, HabitStatus.INACTIVE);
+        HabitDto habitDto = new HabitDto(1L,"test123", 13, LocalDate.now(), 20,
+                HabitStatus.INACTIVE, 30, 30);
         HabitEntity habitEntity = new HabitEntity("user1", "test123", 13, LocalDate.now(), 20);
         HabitEntity habitEntity1 = new HabitEntity(habitEntity);
         habitEntity1.setId(1L);
@@ -58,7 +59,8 @@ public class HabitServiceTest {
         HabitEntity habitEntity = new HabitEntity(userId, "habit1", 20, LocalDate.now(), 100);
         habitEntity.setStatus(HabitStatus.ACTIVE);
         habitEntity.setId(2L);
-        HabitDto result = new HabitDto(2L, "habit1", 20, LocalDate.now(), 100, HabitStatus.ACTIVE);
+        HabitDto result = new HabitDto(2L, "habit1", 20, LocalDate.now(), 100,
+                HabitStatus.ACTIVE, 30, 30);
         ExecutionDaysEntity executionDaysEntity = new ExecutionDaysEntity();
         executionDaysEntity.setExecutionDays(Set.of(ExecutionDayOption.MONDAY));
         executionDaysEntity.setId(1L);

@@ -1,8 +1,10 @@
 package com.habit.tracker.core.controller;
 
 import com.habit.tracker.core.dto.ExecutionDayRequestDto;
+import com.habit.tracker.core.dto.HabitCreateRequestDto;
 import com.habit.tracker.core.dto.HabitDto;
 import com.habit.tracker.core.dto.HabitWithDaysDto;
+import com.habit.tracker.core.mapper.HabitMapper;
 import com.habit.tracker.core.service.HabitService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +18,13 @@ import java.util.List;
 @Controller
 @RequestMapping("/habit")
 public class HabitController {
-    private HabitService habitService;
+    private final HabitService habitService;
+    private final HabitMapper habitMapper;
 
     @Autowired
-    HabitController(HabitService habitService){
+    HabitController(HabitService habitService, HabitMapper habitMapper){
         this.habitService = habitService;
+        this.habitMapper = habitMapper;
     }
 
     @GetMapping("/get/all")
@@ -36,8 +40,8 @@ public class HabitController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Void> saveHabit(@AuthenticationPrincipal Jwt jwt, @RequestBody HabitDto habitDto){
-        this.habitService.saveUserHabit(jwt.getClaimAsString("sub"), habitDto);
+    public ResponseEntity<Void> saveHabit(@AuthenticationPrincipal Jwt jwt, @RequestBody HabitCreateRequestDto habitDto){
+        this.habitService.saveUserHabit(jwt.getClaimAsString("sub"), habitMapper.toHabitDto(habitDto));
         return ResponseEntity.noContent().build();
     }
 
