@@ -1,7 +1,7 @@
 package com.habit.tracker.core.controller;
 
 import com.habit.tracker.core.dto.EditExecutionDateRequest;
-import com.habit.tracker.core.dto.ExecutionHistoryDto;
+import com.habit.tracker.core.dto.ExecutionHistoryDayDto;
 import com.habit.tracker.core.dto.HabitExecutionHistoryDto;
 import com.habit.tracker.core.dto.MarkHabitRequestDto;
 import com.habit.tracker.core.exceptions.IncorrectDateException;
@@ -28,8 +28,8 @@ public class ExecutionHistoryController {
 
 
     @GetMapping("/in/day")
-    public ResponseEntity<List<ExecutionHistoryDto>> getExecutionInDay(@AuthenticationPrincipal Jwt jwt, @RequestParam LocalDate date){
-        List<ExecutionHistoryDto> executionHistoryDtoList = this.executionHistoryService
+    public ResponseEntity<List<ExecutionHistoryDayDto>> getExecutionInDay(@AuthenticationPrincipal Jwt jwt, @RequestParam LocalDate date){
+        List<ExecutionHistoryDayDto> executionHistoryDtoList = this.executionHistoryService
                 .getExecutionInDay(jwt.getClaim("sub"), date);
         return ResponseEntity.ok(executionHistoryDtoList);
     }

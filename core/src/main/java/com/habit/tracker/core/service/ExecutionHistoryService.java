@@ -1,7 +1,7 @@
 package com.habit.tracker.core.service;
 
-import com.habit.tracker.core.dto.ExecutionHistoryDayDto;
 import com.habit.tracker.core.dto.ExecutionHistoryDto;
+import com.habit.tracker.core.dto.ExecutionHistoryDayDto;
 import com.habit.tracker.core.dto.HabitDto;
 import com.habit.tracker.core.dto.HabitExecutionHistoryDto;
 import com.habit.tracker.core.entity.ExecutionHistoryEntity;
@@ -38,16 +38,16 @@ public class ExecutionHistoryService {
         this.habitMapper = habitMapper;
     }
 
-    public List<ExecutionHistoryDto> getExecutionInDay(String userId, LocalDate date) {
+    public List<ExecutionHistoryDayDto> getExecutionInDay(String userId, LocalDate date) {
         List<ExecutionHistoryEntity> executionHistoryList = this.executionHistoryRepository.findExecutionInDay(userId, date);
         return executionHistoryList.stream().map(this::mapToDto).toList();
     }
 
     public HabitExecutionHistoryDto getExecutionOfHabit(String userId, Long habitId) {
         List<ExecutionHistoryEntity> executionHistoryEntities = this.executionHistoryRepository.findExecutionForHabitId(userId, habitId);
-        List<ExecutionHistoryDayDto> executionDays = executionHistoryEntities.stream()
+        List<ExecutionHistoryDto> executionDays = executionHistoryEntities.stream()
                 .map((ExecutionHistoryEntity e) ->
-                        new ExecutionHistoryDayDto(e.getId(), e.getDate(), e.getExecutionState())).toList();
+                        new ExecutionHistoryDto(e.getId(), e.getDate(), e.getExecutionState())).toList();
         return new HabitExecutionHistoryDto(executionHistoryEntities.get(0).getHabit().getName(), executionDays);
 
     }
@@ -65,13 +65,15 @@ public class ExecutionHistoryService {
     public void markHabitInDay(String userId, Long habitId, ExecutionState state, LocalDate date) throws IncorrectDateException {
         HabitEntity habit = this.habitService.getHabitById(habitId);
         if (date != null) {
-            if (isValidToMark(userId, habit)) {
-                ExecutionHistoryEntity executionHistoryEntity = this.createRecord(habitId, date, state, habit);
-                this.executionHistoryRepository.save(executionHistoryEntity);
-            } else if (habit.getStatus().equals(HabitStatus.INACTIVE)) {
-                throw new AccessDeniedException("Habit is not purchase");
-            } else {
-                throw new AccessDeniedException("You don't own this habit");
+            if(this.checkIsNotAfterToday(date) && this.checkIsExecutionEditable(date)) {
+                if (isValidToMark(userId, habit)) {
+                    ExecutionHistoryEntity executionHistoryEntity = this.createRecord(habitId, date, state, habit);
+                    this.executionHistoryRepository.save(executionHistoryEntity);
+                } else if (habit.getStatus().equals(HabitStatus.INACTIVE)) {
+                    throw new AccessDeniedException("Habit is not purchase");
+                } else {
+                    throw new AccessDeniedException("You don't own this habit");
+                }
             }
         } else {
             throw new IncorrectDateException("Date can not by null");
@@ -81,7 +83,7 @@ public class ExecutionHistoryService {
     public void editDateOfExecution(String userId, Long executionId, LocalDate newDate) throws IncorrectDateException {
         ExecutionHistoryEntity executionHistory = this.executionHistoryRepository
                 .findById(executionId).orElseThrow(EntityNotFoundException::new);
-        if(executionHistory.getHabit().getUserId().equals(userId)){
+        if(!executionHistory.getHabit().getUserId().equals(userId)){
             throw new AccessDeniedException("You don't own habit related to this execution");
         }
         if (this.checkIsNotAfterToday(newDate)) {
@@ -126,7 +128,7 @@ public class ExecutionHistoryService {
             return true;
         } else {
             throw new IncorrectDateException("You can't edit record before " + deadline.toString()
-                    + "current try date was" + date.toString());
+                    + " current try date was " + date.toString());
         }
     }
 
@@ -134,8 +136,8 @@ public class ExecutionHistoryService {
         return !date.isAfter(LocalDate.now());
     }
 
-    private ExecutionHistoryDto mapToDto(ExecutionHistoryEntity executionHistoryEntity) {
-        return new ExecutionHistoryDto(executionHistoryEntity.getId(),
+    private ExecutionHistoryDayDto mapToDto(ExecutionHistoryEntity executionHistoryEntity) {
+        return new ExecutionHistoryDayDto(executionHistoryEntity.getId(),
                 this.habitMapper.toHabitDto(executionHistoryEntity.getHabit()),
                 executionHistoryEntity.getExecutionState(), executionHistoryEntity.getDate());
     }

@@ -1,41 +1,62 @@
+import com.habit.tracker.core.App;
+import com.habit.tracker.core.dto.ExecutionHistoryDayDto;
+import com.habit.tracker.core.dto.HabitDto;
+import com.habit.tracker.core.entity.ExecutionDaysEntity;
 import com.habit.tracker.core.entity.ExecutionHistoryEntity;
 import com.habit.tracker.core.entity.HabitEntity;
 import com.habit.tracker.core.enums.ExecutionState;
 import com.habit.tracker.core.enums.HabitStatus;
 import com.habit.tracker.core.exceptions.IncorrectDateException;
+import com.habit.tracker.core.mapper.HabitMapper;
 import com.habit.tracker.core.repository.ExecutionHistoryRepository;
 import com.habit.tracker.core.service.ExecutionHistoryService;
 import com.habit.tracker.core.service.HabitService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 @ExtendWith(MockitoExtension.class)
 public class ExecutionHistoryServiceTest {
+
     @Mock
     HabitService habitService;
     @Mock
     ExecutionHistoryRepository executionHistoryRepository;
+    @Mock
+    HabitMapper habitMapper;
     @InjectMocks
     ExecutionHistoryService executionHistoryService;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        MockitoAnnotations.openMocks(this);
+        setField(executionHistoryService, "numberOfEditableDay", 7);
+    }
 
     @Test
     void testMarkHabitInDaySuccess() throws IncorrectDateException {
         String userId = "test123";
         Long habitId = 2L;
         ExecutionState state = ExecutionState.DONE;
-        LocalDate date = LocalDate.of(2024,9,12);
-        HabitEntity habit = new HabitEntity("habit123", 10, LocalDate.of(2024,12,12), 100);
+        LocalDate date = LocalDate.now();
+        HabitEntity habit = new HabitEntity("habit123", 10, LocalDate.of(2024, 12, 12), 100);
         habit.setId(habitId);
         habit.setUserId(userId);
         habit.setStatus(HabitStatus.ACTIVE);
@@ -51,12 +72,12 @@ public class ExecutionHistoryServiceTest {
     }
 
     @Test
-    void testMarkHabitInDayFailureDateNull(){
+    void testMarkHabitInDayFailureDateNull() {
         String userId = "test123";
         Long habitId = 2L;
         ExecutionState state = ExecutionState.DONE;
         LocalDate date = null;
-        HabitEntity habit = new HabitEntity("habit123", 10, LocalDate.of(2024,12,12), 100);
+        HabitEntity habit = new HabitEntity("habit123", 10, LocalDate.of(2024, 12, 12), 100);
         habit.setId(habitId);
         habit.setUserId(userId);
         habit.setStatus(HabitStatus.ACTIVE);
@@ -66,54 +87,177 @@ public class ExecutionHistoryServiceTest {
 
 
     @Test
-    void testMarkHabitInDayHabitNotActive(){
+    void testMarkHabitInDayHabitNotActive() {
         String userId = "test123";
         Long habitId = 2L;
         ExecutionState state = ExecutionState.DONE;
         LocalDate date = LocalDate.now();
-        HabitEntity habit = new HabitEntity("habit123", 10, LocalDate.of(2024,12,12), 100);
+        HabitEntity habit = new HabitEntity("habit123", 10, LocalDate.of(2024, 12, 12), 100);
         habit.setId(habitId);
         habit.setUserId(userId);
         habit.setStatus(HabitStatus.INACTIVE);
         when(habitService.getHabitById(habitId)).thenReturn(habit);
-        assertThrows(AccessDeniedException.class, ()->this.executionHistoryService.markHabitInDay(userId, habitId, state, date));
+        assertThrows(AccessDeniedException.class, () -> this.executionHistoryService.markHabitInDay(userId, habitId, state, date));
         verify(executionHistoryRepository, times(0)).save(any(ExecutionHistoryEntity.class));
     }
 
     @Test
-    void testMarkHabitInDayHabitUserNotOwnHabit(){
+    void testMarkHabitInDayHabitUserNotOwnHabit() {
         String userId = "test123";
-        String otherUserId ="other321";
+        String otherUserId = "other321";
         Long habitId = 2L;
         ExecutionState state = ExecutionState.DONE;
         LocalDate date = LocalDate.now();
-        HabitEntity habit = new HabitEntity("habit123", 10, LocalDate.of(2024,12,12), 100);
+        HabitEntity habit = new HabitEntity("habit123", 10, LocalDate.of(2024, 12, 12), 100);
         habit.setId(habitId);
         habit.setUserId(userId);
         habit.setStatus(HabitStatus.ACTIVE);
         when(habitService.getHabitById(habitId)).thenReturn(habit);
-        assertThrows(AccessDeniedException.class, ()->this.executionHistoryService.markHabitInDay(otherUserId, habitId, state, date));
+        assertThrows(AccessDeniedException.class, () -> this.executionHistoryService.markHabitInDay(otherUserId, habitId, state, date));
         verify(executionHistoryRepository, times(0)).save(any(ExecutionHistoryEntity.class));
     }
 
     @Test
-    void testMarkHabitInDayHabitExecutionAlreadyExistOnDay(){
+    void testMarkHabitInDayHabitExecutionAlreadyExistOnDay() throws IncorrectDateException {
         String userId = "test123";
-        String otherUserId ="other321";
         Long habitId = 2L;
         ExecutionState state = ExecutionState.DONE;
-        LocalDate date = LocalDate.of(2025, 2,2);
-        HabitEntity habit = new HabitEntity("habit123", 10, LocalDate.of(2024,12,12), 100);
+        LocalDate date = LocalDate.now().minusDays(2);
+        HabitEntity habit = new HabitEntity("habit123", 10, LocalDate.of(2024, 12, 12), 100);
         habit.setId(habitId);
         habit.setUserId(userId);
         habit.setStatus(HabitStatus.ACTIVE);
+        ExecutionHistoryEntity executionInDatabase = new ExecutionHistoryEntity();
+        executionInDatabase.setHabit(habit);
+        executionInDatabase.setExecutionState(ExecutionState.NOTDONEUNCHECKED);
+        executionInDatabase.setDate(date);
+        executionInDatabase.setId(3L);
+        when(habitService.getHabitById(habitId)).thenReturn(habit);
+        when(executionHistoryRepository.findByHabitIdAndDate(habitId, date)).thenReturn(Optional.of(executionInDatabase));
+        this.executionHistoryService.markHabitInDay(userId, habitId, state, date);
+        ArgumentCaptor<ExecutionHistoryEntity> argumentCaptor = ArgumentCaptor.forClass(ExecutionHistoryEntity.class);
+        verify(executionHistoryRepository).save(argumentCaptor.capture());
+        ExecutionHistoryEntity savedResults = argumentCaptor.getValue();
+        executionInDatabase.setExecutionState(ExecutionState.DONE);
+        assertEquals(executionInDatabase, savedResults);
+    }
+
+
+    @Test
+    void markHabitBeforeAllowedDate() {
+        HabitEntity habit = new HabitEntity();
+        habit.setId(3L);
+        habit.setPoints(10);
+        habit.setUnlockCost(20);
+        habit.setUserId("test123");
+        habit.setPurchaseDate(LocalDate.of(2024, 12, 20));
+        habit.setCreationDate(LocalDate.of(2024, 12, 20));
+        habit.setName("Make bed");
+        habit.setStatus(HabitStatus.ACTIVE);
+        when(this.habitService.getHabitById(3L)).thenReturn(habit);
+        assertThrows(IncorrectDateException.class, () -> this.executionHistoryService.markHabitInDay("test123", 3L, ExecutionState.DONE, LocalDate.now().minusDays(12)));
+
+    }
+
+
+    @Test
+    void testEditDateOfExecutionInvalidNewDate() throws IncorrectDateException {
+        HabitEntity habit = new HabitEntity();
+        habit.setId(3L);
+        habit.setPoints(10);
+        habit.setUnlockCost(20);
+        habit.setUserId("test123");
+        habit.setPurchaseDate(LocalDate.of(2024, 12, 20));
+        habit.setCreationDate(LocalDate.of(2024, 12, 20));
+        habit.setName("Make bed");
+        habit.setStatus(HabitStatus.ACTIVE);
         ExecutionHistoryEntity executionHistoryEntity = new ExecutionHistoryEntity();
         executionHistoryEntity.setExecutionState(ExecutionState.DONE);
-        executionHistoryEntity.setHabit(habit);
         executionHistoryEntity.setId(3L);
-        executionHistoryEntity.setDate(LocalDate.of(2025,2,2));
-        when(habitService.getHabitById(habitId)).thenReturn(habit);
-        assertThrows(AccessDeniedException.class, ()->this.executionHistoryService.markHabitInDay(otherUserId, habitId, state, date));
-        verify(executionHistoryRepository, times(0)).save(any(ExecutionHistoryEntity.class));
+        executionHistoryEntity.setDate(LocalDate.now());
+        executionHistoryEntity.setHabit(habit);
+
+        when(this.executionHistoryRepository.findById(3L)).thenReturn(Optional.of(executionHistoryEntity));
+        this.executionHistoryService.editDateOfExecution("test123", 3L, LocalDate.now().minusDays(3));
+        ArgumentCaptor<ExecutionHistoryEntity> argumentCaptor = ArgumentCaptor.forClass(ExecutionHistoryEntity.class);
+        verify(executionHistoryRepository).save(argumentCaptor.capture());
+        ExecutionHistoryEntity savedResults = argumentCaptor.getValue();
+        executionHistoryEntity.setDate(LocalDate.now().minusDays(3));
+        assertEquals(executionHistoryEntity, savedResults);
+    }
+
+
+
+    @Test
+    void testEditDateOfExecutionToOldOldDate() {
+        HabitEntity habit = new HabitEntity();
+        habit.setId(3L);
+        habit.setPoints(10);
+        habit.setUnlockCost(20);
+        habit.setUserId("test123");
+        habit.setPurchaseDate(LocalDate.of(2024, 12, 20));
+        habit.setCreationDate(LocalDate.of(2024, 12, 20));
+        habit.setName("Make bed");
+        habit.setStatus(HabitStatus.ACTIVE);
+        ExecutionHistoryEntity executionHistoryEntity = new ExecutionHistoryEntity();
+        executionHistoryEntity.setExecutionState(ExecutionState.DONE);
+        executionHistoryEntity.setId(3L);
+        executionHistoryEntity.setDate(LocalDate.now().minusDays(20));
+        executionHistoryEntity.setHabit(habit);
+
+        when(this.executionHistoryRepository.findById(3L)).thenReturn(Optional.of(executionHistoryEntity));
+        assertThrows(IncorrectDateException.class, ()->this.executionHistoryService
+                .editDateOfExecution("test123", 3L, LocalDate.now()));
+
+    }
+
+
+    @Test
+    void testEditDateOfExecutionSuccess() {
+        HabitEntity habit = new HabitEntity();
+        habit.setId(3L);
+        habit.setPoints(10);
+        habit.setUnlockCost(20);
+        habit.setUserId("test123");
+        habit.setPurchaseDate(LocalDate.of(2024, 12, 20));
+        habit.setCreationDate(LocalDate.of(2024, 12, 20));
+        habit.setName("Make bed");
+        habit.setStatus(HabitStatus.ACTIVE);
+        ExecutionHistoryEntity executionHistoryEntity = new ExecutionHistoryEntity();
+        executionHistoryEntity.setExecutionState(ExecutionState.DONE);
+        executionHistoryEntity.setId(3L);
+        executionHistoryEntity.setDate(LocalDate.now());
+        executionHistoryEntity.setHabit(habit);
+
+        when(this.executionHistoryRepository.findById(3L)).thenReturn(Optional.of(executionHistoryEntity));
+        assertThrows(IncorrectDateException.class, () -> this.executionHistoryService
+                .editDateOfExecution("test123", 3L, LocalDate.now().minusDays(20)));
+    }
+
+
+    @Test
+    void getExecutionInDay() {
+        String userId = "test123";
+        LocalDate date = LocalDate.now();
+        ExecutionHistoryEntity executionHistoryEntity = new ExecutionHistoryEntity();
+        executionHistoryEntity.setDate(date);
+        executionHistoryEntity.setId(3L);
+        executionHistoryEntity.setExecutionState(ExecutionState.DONE);
+        HabitEntity habit = new HabitEntity();
+        habit.setId(2L);
+        habit.setStatus(HabitStatus.ACTIVE);
+        habit.setUserId(userId);
+        habit.setCreationDate(LocalDate.now());
+        habit.setPurchaseDate(LocalDate.now());
+        habit.setPoints(30);
+        habit.setUnlockCost(1000);
+        habit.setName("Make bed");
+        HabitDto habitDto = new HabitDto(habit.getId(), habit.getName(), habit.getPoints(), habit.getCreationDate(), habit.getUnlockCost(), habit.getStatus());
+        executionHistoryEntity.setHabit(habit);
+        ExecutionHistoryDayDto result = new ExecutionHistoryDayDto(3L, habitDto, ExecutionState.DONE, date);
+        when(habitMapper.toHabitDto(habit)).thenReturn(habitDto);
+        when(this.executionHistoryRepository.findExecutionInDay(userId, date)).thenReturn(List.of(executionHistoryEntity));
+        assertEquals(List.of(result), this.executionHistoryService.getExecutionInDay(userId, date));
+        Mockito.verify(executionHistoryRepository, Mockito.times(1)).findExecutionInDay(userId, date);
     }
 }

@@ -84,5 +84,7 @@ public class HabitServiceTest {
         verify(executionDayRepository).save(argumentCaptor.capture());
         ExecutionDaysEntity savedResults = argumentCaptor.getValue();
         assertEquals(Set.of(executionDayOption), savedResults.getExecutionDays());
+        verify(executionDayRepository).save(argumentCaptor.capture());
+
     }
 }
