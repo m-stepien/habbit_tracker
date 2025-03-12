@@ -24,7 +24,7 @@ import java.util.List;
 @Service
 public class ExecutionHistoryService {
 
-    @Value("${properties.day-back-editable}")
+    @Value("${properties.days-back-editable}")
     private int numberOfEditableDay;
 
     private HabitService habitService;
@@ -78,9 +78,12 @@ public class ExecutionHistoryService {
         }
     }
 
-    public void editDateOfExecution(Long executionId, LocalDate newDate) throws IncorrectDateException {
+    public void editDateOfExecution(String userId, Long executionId, LocalDate newDate) throws IncorrectDateException {
         ExecutionHistoryEntity executionHistory = this.executionHistoryRepository
                 .findById(executionId).orElseThrow(EntityNotFoundException::new);
+        if(executionHistory.getHabit().getUserId().equals(userId)){
+            throw new AccessDeniedException("You don't own habit related to this execution");
+        }
         if (this.checkIsNotAfterToday(newDate)) {
             this.checkIsExecutionEditable(executionHistory.getDate());
             this.checkIsExecutionEditable(newDate);

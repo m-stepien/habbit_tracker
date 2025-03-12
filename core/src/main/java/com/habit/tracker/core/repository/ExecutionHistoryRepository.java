@@ -12,10 +12,10 @@ import java.util.Optional;
 
 @Repository
 public interface ExecutionHistoryRepository extends JpaRepository<ExecutionHistoryEntity, Long> {
-    @Query("SELECT e FROM ExecutionHistoryEntity e WHERE e.habit.id = :habit_id AND e.date = :date LIMIT 1")
+    @Query("SELECT e FROM ExecutionHistoryEntity e WHERE e.habit.id = :habit_id AND e.date = :date ORDER BY id ASC LIMIT 1")
     public Optional<ExecutionHistoryEntity> findByHabitIdAndDate(@Param("habit_id") Long id, @Param("date") LocalDate localDate);
 
-    @Query("DELETE e FROM ExecutionHistoryEntity e WHERE e.habit.userId = :userId AND e.id = :executionId")
+    @Query("DELETE FROM ExecutionHistoryEntity e WHERE e.habit.userId = :userId AND e.id = :executionId")
     public void deleteUserExecutionHistory(@Param("userId") String userId, @Param("executionId") Long executionId);
 
     @Query("SELECT e FROM ExecutionHistoryEntity e WHERE e.habit.userId = :userId AND e.date = :date")
