@@ -26,7 +26,7 @@ public class PointServiceTest {
         String userId = "123";
         PointsEntity points = new PointsEntity(userId, 200);
         when(this.pointsRepository.findById(userId)).thenReturn(Optional.of(points));
-        assertTrue(this.pointsService.canUserBuy(userId, 50));
+        assertTrue(this.pointsService.hasEnougthPoints(userId, 50));
     }
 
     @Test
@@ -34,14 +34,14 @@ public class PointServiceTest {
         String userId = "123";
         PointsEntity points = new PointsEntity(userId, 50);
         when(this.pointsRepository.findById(userId)).thenReturn(Optional.of(points));
-        assertFalse(this.pointsService.canUserBuy(userId, 90));
+        assertFalse(this.pointsService.hasEnougthPoints(userId, 90));
     }
 
     @Test
     void testCanUserButyThrowExceptionWhenRecordDoesntExist(){
         String userId = "123";
         when(this.pointsRepository.findById(userId)).thenReturn(Optional.empty());
-        assertThrows(EntityNotFoundException.class, ()->this.pointsService.canUserBuy(userId, 50));
+        assertThrows(EntityNotFoundException.class, ()->this.pointsService.hasEnougthPoints(userId, 50));
     }
 
     @Test

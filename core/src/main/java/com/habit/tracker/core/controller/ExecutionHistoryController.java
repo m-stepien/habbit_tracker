@@ -6,6 +6,8 @@ import com.habit.tracker.core.dto.HabitExecutionHistoryDto;
 import com.habit.tracker.core.dto.MarkHabitRequestDto;
 import com.habit.tracker.core.exceptions.IncorrectDateException;
 import com.habit.tracker.core.service.ExecutionHistoryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,6 +22,8 @@ import java.util.List;
 public class ExecutionHistoryController {
 
     private ExecutionHistoryService executionHistoryService;
+    private static final Logger logger = LoggerFactory.getLogger(ExecutionHistoryController.class);
+
 
     @Autowired
     public ExecutionHistoryController(ExecutionHistoryService executionHistoryService){
@@ -28,41 +32,53 @@ public class ExecutionHistoryController {
 
 
     @GetMapping("/in/day")
-    public ResponseEntity<List<ExecutionHistoryDayDto>> getExecutionInDay(@AuthenticationPrincipal Jwt jwt, @RequestParam LocalDate date){
+    public ResponseEntity<List<ExecutionHistoryDayDto>> getExecutionInDay(@AuthenticationPrincipal Jwt jwt, @RequestParam("date") LocalDate date){
+        String userId = jwt.getClaim("sub");
+        logger.info("Get execution history on day {} for user {}", date, userId);
         List<ExecutionHistoryDayDto> executionHistoryDtoList = this.executionHistoryService
-                .getExecutionInDay(jwt.getClaim("sub"), date);
+                .getExecutionInDay(userId, date);
         return ResponseEntity.ok(executionHistoryDtoList);
     }
 
     @GetMapping("/by/habit")
-    public ResponseEntity<HabitExecutionHistoryDto> getExecutionOfHabit(@AuthenticationPrincipal Jwt jwt, @RequestParam Long id){
-        HabitExecutionHistoryDto habitExecutionHistory = this.executionHistoryService.getExecutionOfHabit(jwt.getClaim("sub"), id);
+    public ResponseEntity<HabitExecutionHistoryDto> getExecutionOfHabit(@AuthenticationPrincipal Jwt jwt, @RequestParam("id") Long id){
+        String userId = jwt.getClaim("sub");
+        logger.info("Get execution history for habit {} user {}", id, userId);
+        HabitExecutionHistoryDto habitExecutionHistory = this.executionHistoryService.getExecutionOfHabit(userId, id);
         return ResponseEntity.ok(habitExecutionHistory);
     }
 
     @GetMapping("/all")
     public ResponseEntity<List<HabitExecutionHistoryDto>> getAllExecutions(@AuthenticationPrincipal Jwt jwt){
-        List<HabitExecutionHistoryDto> executionHistoryList = this.executionHistoryService.getAllExecutionHistory(jwt.getClaim("sub"));
+        String userId = jwt.getClaim("sub");
+        logger.info("Get all execution history for user {}", userId);
+        List<HabitExecutionHistoryDto> executionHistoryList = this.executionHistoryService.getAllExecutionHistory(userId);
         return ResponseEntity.ok(executionHistoryList);
     }
 
     @PostMapping("/mark")
     public ResponseEntity<Void> markHabitInDay(@AuthenticationPrincipal Jwt jwt,
                                                @RequestBody MarkHabitRequestDto markHabitRequest) throws IncorrectDateException {
-        this.executionHistoryService.markHabitInDay(jwt.getClaim("sub"),
+        String userId = jwt.getClaim("sub");
+        logger.info("Post execution history of habit {} for user {}", markHabitRequest.habitId(), userId);
+        this.executionHistoryService.markHabitInDay(userId,
                 markHabitRequest.habitId(), markHabitRequest.executionState(), markHabitRequest.date());
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/edit")
     public ResponseEntity<Void> editExecutionDate(@AuthenticationPrincipal Jwt jwt, @RequestBody EditExecutionDateRequest editExecutionDateRequest) throws IncorrectDateException{
-        this.executionHistoryService.editDateOfExecution(jwt.getClaim("sub"), editExecutionDateRequest.id(), editExecutionDateRequest.newDate());
+        String userId = jwt.getClaim("sub");
+        logger.info("Post update execution history id {} for user {}", editExecutionDateRequest.id(), userId);
+        this.executionHistoryService.editDateOfExecution(userId, editExecutionDateRequest.id(), editExecutionDateRequest.newDate());
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/delete")
-    public ResponseEntity<Void> deleteExecution(@AuthenticationPrincipal Jwt jwt, Long id){
-        this.executionHistoryService.deleteHabitExecutionInDay(jwt.getClaim("sub"), id);
+    @DeleteMapping("/delete")
+    public ResponseEntity<Void> deleteExecution(@AuthenticationPrincipal Jwt jwt, @RequestParam("id") Long id){
+        String userId = jwt.getClaim("sub");
+        logger.info("Delete execution {} for user {}", userId, id);
+        this.executionHistoryService.deleteHabitExecutionInDay(userId, id);
         return ResponseEntity.noContent().build();
     }
 }

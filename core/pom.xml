@@ -18,6 +18,7 @@
         <SPRING-BOOT-VERSION>3.4.3</SPRING-BOOT-VERSION>
         <SPRING-TEST-VERSION>6.4.3</SPRING-TEST-VERSION>
         <KEYCLOAK-VERSION>25.0.3</KEYCLOAK-VERSION>
+        <OPEN-API-VERSION>2.8.5</OPEN-API-VERSION>
     </properties>
     <dependencies>
         <dependency>
@@ -46,10 +47,27 @@
             <version>${SPRING-BOOT-VERSION}</version>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+            <version>${SPRING-BOOT-VERSION}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.5</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>${OPEN-API-VERSION}</version>
+        </dependency>
+        <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <version>2.3.232</version>
-            <scope>runtime</scope>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

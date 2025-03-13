@@ -8,21 +8,25 @@ spring:
           issuer-uri: http://localhost:8200/realms/habit-tracker
           jwk-set-uri: http://localhost:8200/realms/habit-tracker/protocol/openid-connect/certs
   datasource:
-    url: jdbc:h2:mem:testdb
-    driverClassName: org.h2.Driver
-    username: sa
-    password:
-    h2:
-      console:
-        enabled: true
-        path: /h2-console
-    jpa:
-      database-platform: org.hibernate.dialect.H2Dialect
-      hibernate:
-        ddl-auto: update
-      show-sql: true
+    url: jdbc:postgresql://localhost:5432/habittrackerdb
+    driver-class-name: org.postgresql.Driver
+    username: habittracker
+    password: passhabit
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
 keycloak:
   client-id: habit-tracker-client
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui/index.html
+    operations-sorter: method
+    disable-swagger-default-url: true
 properties:
   start-points: 300
   days-back-editable: 7

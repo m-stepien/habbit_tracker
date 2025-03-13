@@ -31,8 +31,8 @@ public class HabitMapper {
     }
 
     public HabitDto toHabitDto(HabitCreateRequestDto habitCreateRequestDto){
-        return  new HabitDto(habitCreateRequestDto.id(), habitCreateRequestDto.name(), habitCreateRequestDto.points(),
-                habitCreateRequestDto.creationDate(), habitCreateRequestDto.unlockCost(), habitCreateRequestDto.status(),
-                habitCreateRequestDto.daysToMaster() ,habitCreateRequestDto.daysToMaster());
+        return  new HabitDto(null, habitCreateRequestDto.name(), habitCreateRequestDto.points(),
+                null, habitCreateRequestDto.unlockCost(), null,
+                habitCreateRequestDto.daysToMaster() , habitCreateRequestDto.daysToMaster());
     }
 }

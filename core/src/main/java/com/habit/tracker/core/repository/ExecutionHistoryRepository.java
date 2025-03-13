@@ -15,12 +15,9 @@ public interface ExecutionHistoryRepository extends JpaRepository<ExecutionHisto
     @Query("SELECT e FROM ExecutionHistoryEntity e WHERE e.habit.id = :habit_id AND e.date = :date ORDER BY id ASC LIMIT 1")
     public Optional<ExecutionHistoryEntity> findByHabitIdAndDate(@Param("habit_id") Long id, @Param("date") LocalDate localDate);
 
-    @Query("DELETE FROM ExecutionHistoryEntity e WHERE e.habit.userId = :userId AND e.id = :executionId")
-    public void deleteUserExecutionHistory(@Param("userId") String userId, @Param("executionId") Long executionId);
-
     @Query("SELECT e FROM ExecutionHistoryEntity e WHERE e.habit.userId = :userId AND e.date = :date")
     public List<ExecutionHistoryEntity> findExecutionInDay(@Param("userId") String userId, @Param("date") LocalDate date);
 
-    @Query("SELECT e FROM ExecutionHistoryEntity e WHERE e.habit.userId = :userId AND e.habit.id = :habitId")
-    public List<ExecutionHistoryEntity> findExecutionForHabitId(@Param("userId") String userId, @Param("habitId") Long habitId);
+    @Query("SELECT e FROM ExecutionHistoryEntity e WHERE e.habit.id = :habitId")
+    public List<ExecutionHistoryEntity> findExecutionForHabitId(@Param("habitId") Long habitId);
 }

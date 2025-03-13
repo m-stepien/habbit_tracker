@@ -1,6 +1,8 @@
 package com.habit.tracker.core.controller;
 
+import com.habit.tracker.core.exceptions.HabitNotFoundException;
 import com.habit.tracker.core.exceptions.IncorrectDateException;
+import com.habit.tracker.core.repository.HabitAlreadyExistException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -29,6 +31,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(response);
     }
 
+    @ExceptionHandler(HabitNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleHabitNotFoundException(HabitNotFoundException exception){
+        Map<String, Object> response = new HashMap<>();
+        response.put("Message", exception.getMessage());
+        response.put("Error", "Data not found");
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(HabitAlreadyExistException.class)
+    public ResponseEntity<Map<String, Object>> handleGeneralException(HabitAlreadyExistException exception) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", "Data already exist");
+        response.put("message", exception.getMessage());
+        return ResponseEntity.internalServerError().body(response);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneralException(Exception exception) {
         Map<String, Object> response = new HashMap<>();
@@ -37,6 +55,5 @@ public class GlobalExceptionHandler {
         response.put("timestamp", LocalDateTime.now());
         return ResponseEntity.internalServerError().body(response);
     }
-
 }
 

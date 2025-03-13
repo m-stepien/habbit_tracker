@@ -95,10 +95,6 @@ public class HabitEntity {
         return this.creationDate;
     }
 
-    public void getCreationDate(LocalDate creationDate) {
-        this.creationDate = creationDate;
-    }
-
     public Integer getUnlockCost() {
         return unlockCost;
     }

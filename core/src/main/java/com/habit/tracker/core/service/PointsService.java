@@ -4,6 +4,8 @@ import com.habit.tracker.core.entity.PointsEntity;
 import com.habit.tracker.core.enums.ExecutionState;
 import com.habit.tracker.core.repository.PointsRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ public class PointsService {
 
     @Value("${properties.start-points}")
     private int defaultPoints;
+    private static final Logger logger = LoggerFactory.getLogger(PointsService.class);
 
     @Autowired
     PointsService(PointsRepository pointsRepository) {
@@ -27,6 +30,7 @@ public class PointsService {
         if (!this.pointsRepository.existsById(userId)) {
             points = this.pointsRepository.save(points);
         }
+        logger.info("Creating points for user {} end successfull. Initial point value {}", userId, defaultPoints);
         return points;
     }
 
@@ -41,8 +45,9 @@ public class PointsService {
     }
 
     @Transactional(readOnly = true)
-    public boolean canUserBuy(String userId, int cost) {
+    public boolean hasEnougthPoints(String userId, int cost) {
         PointsEntity points = this.pointsRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+        logger.info("Checking can user buy habit user point value: {} habit cost {}",points, cost);
         return points.getPoints() >= cost;
     }
 
