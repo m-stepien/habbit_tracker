@@ -2,6 +2,7 @@ package com.habit.tracker.core.service;
 
 import com.habit.tracker.core.entity.PointsEntity;
 import com.habit.tracker.core.enums.ExecutionState;
+import com.habit.tracker.core.exceptions.UserNotFoundException;
 import com.habit.tracker.core.repository.PointsRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ public class PointsService {
     }
 
     public PointsEntity getUserPoints(String userId) {
-        return this.pointsRepository.findById(userId).orElse(this.createUserPoints(userId));
+        return this.pointsRepository.findById(userId).orElseThrow(()->new UserNotFoundException("User is not in points table"));
     }
 
     @Transactional(readOnly = true)

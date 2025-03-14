@@ -11,7 +11,6 @@ import com.habit.tracker.core.exceptions.HabitAlreadyBoughtException;
 import com.habit.tracker.core.exceptions.HabitNotFoundException;
 import com.habit.tracker.core.mapper.HabitMapper;
 import com.habit.tracker.core.repository.ExecutionDayRepository;
-import com.habit.tracker.core.repository.HabitAlreadyExistException;
 import com.habit.tracker.core.repository.HabitRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
@@ -63,7 +62,23 @@ public class HabitService {
         return userHabits.stream().map(this.habitMapper::toHabitDto).toList();
     }
 
-    public void saveUserHabit(String userId, HabitDto newHabitDto) throws HabitAlreadyExistException {
+    public List<HabitDto> getUserHabitToExecuteInDay(String userId, LocalDate date){
+        ExecutionDayOption day = ExecutionDayOption.fromDayOfWeek(date.getDayOfWeek());
+        List<HabitEntity> userHabits = this.habitRepository.findByUserId(userId);
+        List<HabitDto> toDo = new ArrayList<>();
+        for(HabitEntity habit : userHabits){
+            if(habit.getStatus().equals(HabitStatus.ACTIVE) && habit.getCreationDate().isBefore(date)){
+                ExecutionDaysEntity executionDays = this.executionDayRepository.findByHabit(habit).orElse(null);
+                if(executionDays!=null){
+                    if(executionDays.getExecutionDays().contains(day) || executionDays.getExecutionDays().contains(ExecutionDayOption.EVERYDAY)){
+                        toDo.add(this.habitMapper.toHabitDto(habit));
+                    }
+                }
+            }
+        }
+        return toDo;
+    }
+    public void saveUserHabit(String userId, HabitDto newHabitDto) throws HabitNotFoundException.HabitAlreadyExistException {
         List<HabitEntity> habitEntities = this.habitRepository.findByUserIdAndName(userId, newHabitDto.name());
         logger.info("Checking is habit already in database");
         if (habitEntities.isEmpty()) {
@@ -75,7 +90,7 @@ public class HabitService {
             this.habitRepository.save(newHabitEntity);
             logger.info("Successful creating new habit");
         } else {
-            throw new HabitAlreadyExistException("Habit with name " + newHabitDto.name()
+            throw new HabitNotFoundException.HabitAlreadyExistException("Habit with name " + newHabitDto.name()
                     + " already exist for user " + userId);
         }
     }

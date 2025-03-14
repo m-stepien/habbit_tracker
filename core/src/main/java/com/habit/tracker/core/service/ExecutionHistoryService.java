@@ -6,7 +6,6 @@ import com.habit.tracker.core.entity.HabitEntity;
 import com.habit.tracker.core.enums.ExecutionState;
 import com.habit.tracker.core.enums.HabitStatus;
 import com.habit.tracker.core.exceptions.ExecutionHistoryNotFoundException;
-import com.habit.tracker.core.exceptions.HabitNotFoundException;
 import com.habit.tracker.core.exceptions.IncorrectDateException;
 import com.habit.tracker.core.mapper.HabitMapper;
 import com.habit.tracker.core.repository.ExecutionHistoryRepository;
