@@ -4,6 +4,7 @@ import com.habit.tracker.core.dto.*;
 import com.habit.tracker.core.mapper.HabitMapper;
 import com.habit.tracker.core.service.HabitService;
 import jakarta.validation.Valid;
+import jakarta.websocket.server.PathParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Controller
@@ -42,6 +44,14 @@ public class HabitController {
         logger.info("Get habit id:{} for user {}", id, userId);
         HabitWithDaysDto habit = this.habitService.getUserHabitById(userId, id);
         return ResponseEntity.ok(habit);
+    }
+
+    @GetMapping("/get/on")
+    public ResponseEntity<List<HabitDto>> getHabitToDoInDay(@AuthenticationPrincipal Jwt jwt, @RequestParam("date") LocalDate date){
+        String userId = jwt.getClaimAsString("sub");
+        logger.info("Get habits to do in day {} for user {}", date, userId);
+        List<HabitDto> habits = this.habitService.getUserHabitToExecuteInDay(userId, date);
+        return ResponseEntity.ok(habits);
     }
 
     @PostMapping("/add")

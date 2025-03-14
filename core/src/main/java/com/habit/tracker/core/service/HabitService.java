@@ -63,6 +63,23 @@ public class HabitService {
         return userHabits.stream().map(this.habitMapper::toHabitDto).toList();
     }
 
+    public List<HabitDto> getUserHabitToExecuteInDay(String userId, LocalDate date){
+        ExecutionDayOption day = ExecutionDayOption.fromDayOfWeek(date.getDayOfWeek());
+        List<HabitEntity> userHabits = this.habitRepository.findByUserId(userId);
+        List<HabitDto> toDo = new ArrayList<>();
+        for(HabitEntity habit : userHabits){
+            if(habit.getStatus().equals(HabitStatus.ACTIVE) && !habit.getCreationDate().isAfter(date)){
+                ExecutionDaysEntity executionDays = this.executionDayRepository.findByHabit(habit).orElse(null);
+                if(executionDays!=null){
+                    if(executionDays.getExecutionDays().contains(day) || executionDays.getExecutionDays().contains(ExecutionDayOption.EVERYDAY)){
+                        toDo.add(this.habitMapper.toHabitDto(habit));
+                    }
+                }
+            }
+        }
+        return toDo;
+    }
+
     public void saveUserHabit(String userId, HabitDto newHabitDto) throws HabitAlreadyExistException {
         List<HabitEntity> habitEntities = this.habitRepository.findByUserIdAndName(userId, newHabitDto.name());
         logger.info("Checking is habit already in database");
