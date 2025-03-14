@@ -2,7 +2,7 @@ package com.habit.tracker.core.controller;
 
 import com.habit.tracker.core.exceptions.HabitNotFoundException;
 import com.habit.tracker.core.exceptions.IncorrectDateException;
-import com.habit.tracker.core.repository.HabitAlreadyExistException;
+import com.habit.tracker.core.exceptions.HabitAlreadyExistException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;

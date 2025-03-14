@@ -11,7 +11,7 @@ import com.habit.tracker.core.exceptions.HabitAlreadyBoughtException;
 import com.habit.tracker.core.exceptions.HabitNotFoundException;
 import com.habit.tracker.core.mapper.HabitMapper;
 import com.habit.tracker.core.repository.ExecutionDayRepository;
-import com.habit.tracker.core.repository.HabitAlreadyExistException;
+import com.habit.tracker.core.exceptions.HabitAlreadyExistException;
 import com.habit.tracker.core.repository.HabitRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
