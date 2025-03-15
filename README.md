@@ -84,5 +84,17 @@ To import and use them, follow the steps below:
 1. Download the file above.  
 2. Open **Insomnia** and go to `Application` → `Preferences` → `Data`.  
 3. Click **"Import Data"** → **"From File"**.  
-4. Select `insomnia_requests.json` and click **"Import"**.  
+4. Select `insomnia_requests.json` and click **"Import"**.
+
+---
+
+## Next Steps 
+
+Below are some potential future improvements:
+
+**Implement frontend (React + TailwindCSS)**  
+**Add a CI/CD pipeline (GitHub Actions or Jenkins)**  
+**Improve test coverage (integration and e2e tests)** 
+**Optimize database queries and implement indexing in PostgreSQL**  
+**Expand API documentation and generate automatic OpenAPI specs** 
 
